@@ -72,12 +72,35 @@
 
                     <div class="col-sm-5">
                         <div class="list-group">
-                            <a href="#" class="list-group-item active">{{$Business_name}}</a>
-							 <a href="#" class="list-group-item">Selected Service : {{$Service}}</a>
-                           <button type="submit" class="bttn blue full-width" tabindex="202">
-                                            Hire
-                                        </button>
-                         
+
+								<a href="#" class="list-group-item active">{{$Business_name}}</a>
+								 <a href="#" class="list-group-item">Selected Service : {{$Service}}</a>
+								 
+									@if(Session::has('id'))
+										@if($selected_sp == Session::get('id'))
+											<button type="submit" class="bttn blue full-width" tabindex="202">Your Service</button>
+										@else
+											@if($waiting == '0')
+												<a href="{{ URL::to('sp_hire/'.$selected_sp.'/'.$selected_service) }}" rel="nofollow">
+													<button type="submit" class="bttn blue full-width" tabindex="202">Hire</button>
+												</a>
+											@elseif($waiting == '2')
+												<button type="submit" class="bttn blue full-width" tabindex="202">Service In Progress</button>
+
+											@else
+												
+													<button type="submit" class="bttn blue full-width" tabindex="202">Waiting for Service</button>
+												
+											@endif	
+										@endif
+									@else
+											<button type="submit" class="bttn blue full-width" tabindex="202">Login</button>
+									@endif
+			
+			
+
+
+							   
                              
                         </div>
                     </div>

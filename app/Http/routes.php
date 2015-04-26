@@ -13,7 +13,11 @@
 
 Route::get('/', 'WelcomeController@index');
 Route::get('sp_details','HomeController@sp_details');
+Route::get('user_details','HomeController@user_details');
 
+
+Route::get('waiting_sp_approval','HomeController@waiting_sp_approval');
+Route::get('logged_home','HomeController@logged_home');
 
 Route::get('search','HomeController@Search');
 Route::post('search','HomeController@Post_Search');
@@ -37,6 +41,14 @@ Route::post('reset-password','HomeController@Post_reset_password');
 
 Route::get('map','HomeController@map');
 Route::get('sp_name/{id}/{service_id}','HomeController@sp_name');
+
+Route::get('sp_hire/{id}/{service_id}','HomeController@sp_hire');
+Route::post('Delete_Service','HomeController@Delete_Service');
+
+Route::get('client_name/{user_id}/{service_id}','HomeController@client_name');
+
+
+
 //Route::controllers([
 //	'auth' => 'Auth\AuthController',
 //	'password' => 'Auth\PasswordController',

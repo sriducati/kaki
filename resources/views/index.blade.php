@@ -297,7 +297,7 @@ overflow-y:auto;
             <li class="events"><a href="#"><span>Events</span></a></li>
             <li class="lessons"><a href="#"><span>Lessons</span></a></li>
             <li class="wellness"><a href="#"><span>Wellness</span></a></li>
-            <li class="more_services"><a href="#"><span>More</span></a></li>
+            <li class="more_services"><a href="{{ URL::to('sp_details')}}"><span>Account</span></a></li>
     </ul>
 </div>
     </div>

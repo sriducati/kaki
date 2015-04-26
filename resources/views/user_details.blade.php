@@ -95,18 +95,9 @@ overflow-y:auto;
     
 <div data-overview="" class="container-fluid overview ng-scope" ng-controller="SlidesController">
     
-    <div class="full-block navigation-row" style="margin-bottom:50px;margin-top:0px;">
+    <div class="full-block navigation-row " style="margin-bottom:50px;margin-top:0px;">
 		<ul class="navigation-row" data-click-source="header/categories" style="margin:0;">
-				<li class="events"><a href="#"><span><span class="badge">
-				    @if(Session::has('notification_count'))
-						{{Session::get('notification_count')}}
-					@else
-						{{0}}
-					@endif			
-				</span>Waiting for acceptance</span></a></li>
-				
-				<li class="lessons"><a href="#"><span>Services Offered</span></a></li>
-				<li class="lessons"><a href="#"><span>Services Settings</span></a></li>
+				<li class="Homepage"><a href="{{ URL::to('home') }}"><span>Home</span></a></li>		
 				<li class="wellness"><a href="#"><span>Settings</span></a></li>
 				<li class="more_services"><a href="#"><span>Logout</span></a></li>
 		</ul>
@@ -116,37 +107,29 @@ overflow-y:auto;
 			@endif
 <div class="container" style="padding-left:0px;padding-right:0px;">  
 
-				{!! Form::open(array('method' => 'POST', 'action' => 'HomeController@Delete_Service','onSubmit'=>'return ConfirmDelete()')) !!}
-
 <div class="panel panel-default container" style="padding:0px;">
 <table class="table table-condensed table-hover table-aligned">
     <tbody class="text-left">
         <tr>
-            <th>User Name</th>
-            <th>Requested Services</th>
-            <th>Delete</th>
+            <th>SP Name</th>
+            <th>Hired Services</th>
+            <th>Status</th>
         </tr>
     </tbody>
     <tbody class="text-left">
-	@if(isset($client_info))
-		@foreach($client_info as $key=>$value)
+	@if(isset($Hired_Services))
+		@foreach($Hired_Services as $key=>$value)
 		
-		@if($value->Read == '0')
-			<tr style="background-color:rgb(221, 221, 221);">
-		@else
-			<tr style="background-color:#ffffff">
-		@endif
+			<tr>
 			<td>
-			<a href="{{ URL::to('client_name/'.$value->User_Id.'/'.$value->Service_Id)}}">{{$value->Name}}</a>
+			<a href="#">{{$value->Business_Name}}</a>
 			</td>
 			<td>
 			{{$value->Service}}
 			</td>
 			<td>
-				<input name="User_Id" type="hidden" value="{{$value->User_Id}}">
-				<input name="Service_Id" type="hidden" value="{{$value->Service_Id}}">
 				<button class="btn btn-default btn-sm" type="submit">
-					<span class="glyphicon glyphicon-trash"></span>
+					<span>Completed</span>
 				</button>
 				
               
@@ -157,8 +140,6 @@ overflow-y:auto;
     </tbody>
 </table>  
 </div>
-
-  {!! Form::close() !!}
 <div class="pagination pull-right">
     <ul class="pagination pull-right">
         <li><a href="#">Prev</a>

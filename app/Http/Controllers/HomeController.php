@@ -97,6 +97,33 @@ class HomeController extends Controller {
 		return view('map');
 
 	}
+	
+	public function sp_hire($id,$service_id)
+	{
+		
+		
+		
+		$insert_pending = \DB::table('sp_pending_services')->insert(array('User_Id'=>\Session::get('id'),'Sp_Id'=>$id,'Service_Id'=>$service_id,'Active'=>'1','Created_Date'=>\Carbon\Carbon::now()));
+		
+		$waiting = '1';
+		
+		$sp_service_info = \DB::table('sp_service_categories')
+		->where('id',$service_id)
+		->select()->get();
+		
+		$services_info = \DB::table('sp_user_categories')
+			->join('sp_service_info','sp_service_info.SP_Users_Id','=','sp_user_categories.SP_User_Id')
+			->join('SP_Service_Categories','SP_Service_Categories.id','=','sp_user_categories.Service_Id')
+			->where('sp_user_categories.SP_User_Id',$id)
+			->distinct('service')
+			->select('Service','Business_Name','SP_User_Id','Price','Service_Id','Postal_Code')->get();
+			
+		$Business_name = $services_info[0]->Business_Name;
+		$Service = $sp_service_info[0]->Service;
+		
+		
+		return redirect('sp_name/'.$id.'/'.$service_id)->with('services_info',$services_info)->with('Business_name',$Business_name)->with('Service',$Service)->with('selected_sp',$id)->with('selected_service',$service_id)->with('waiting',$waiting);
+	}
 
 	public function sp_name($id,$service_id)
 	{
@@ -106,10 +133,19 @@ class HomeController extends Controller {
 		/*$service_info = \DB::table('SP_Service_Categories')
 		->where('SP_Service_Categories.id',$service_id)
 		->select()->get();*/
-
+		$waiting = '0';
 		$sp_service_info = \DB::table('sp_service_categories')
 		->where('id',$service_id)
 		->select()->get();
+		
+		$pending = \DB::table('sp_pending_services')->where('Sp_Id',$id)->where('Service_Id',$service_id)->where('User_Id',\Session::get('id'))->where('Deleted','0')->select('Active')->get();
+		
+		if($pending)
+		{
+			$waiting = $pending[0]->Active;
+
+		}
+		
 
 		$services_info = \DB::table('sp_user_categories')
 			->join('sp_service_info','sp_service_info.SP_Users_Id','=','sp_user_categories.SP_User_Id')
@@ -121,7 +157,7 @@ class HomeController extends Controller {
 		$Business_name = $services_info[0]->Business_Name;
 		$Service = $sp_service_info[0]->Service;
 		
-		return view('sp_name')->with('services_info',$services_info)->with('Business_name',$Business_name)->with('Service',$Service);
+		return view('sp_name')->with('services_info',$services_info)->with('Business_name',$Business_name)->with('Service',$Service)->with('selected_sp',$id)->with('selected_service',$service_id)->with('waiting',$waiting);
 
 	}
 	
@@ -238,8 +274,7 @@ class HomeController extends Controller {
 		);
 
 		$Insert_data = \DB::table('Sp_Users_Info')->insertGetId($Register_data);
-		echo $Insert_data;
-		exit;
+
 		if($Insert_data)
 		{
 			return redirect('sign-up-user')->with('notification','User registration successfull');
@@ -287,17 +322,22 @@ class HomeController extends Controller {
 
 				$id = \DB::table('sp_users_info')
 						 ->where('email', '=', \Input::get('username'))
-						 ->select('id')
+						 ->select('id','Name')
 						 ->get();	
 			
 				\Session::put('id', $id[0]->id);
+				\Session::put('name', $id[0]->Name);
 				\Session::put('log_nick_name', \Input::get('username'));
 				\Log::info('User  '.\Session::get('log_nick_name').'  has Logged in');
 				
 				//echo \Session::get('id').\Session::get('log_nick_name');
 				//echo '<br>'.'logged in';
 				//exit;
-				return \Redirect::intended('sp_details');
+		
+		
+				
+
+				return \Redirect::to('logged_home');
 			}
 				
 			else{
@@ -308,10 +348,78 @@ class HomeController extends Controller {
 		}
 	}
 	
+	public function Delete_Service()
+	{
+	
+		$delete_client_serice_request = \DB::table('sp_pending_services')->where('User_Id',\Input::get('User_Id'))
+		->where('Service_Id',\Input::get('Service_Id'))->update(array('Deleted' => '1'));
+		
+		return \Redirect::to('sp_details');
+	
+	}
+	
+	public function logged_home()
+	{
+
+		return view('logged_home');
+	
+	}
+	
+	public function client_name($user_id,$service_id)
+	{
+	
+	
+
+	$get_user_info = \DB::table('sp_users_info')->where('id',$user_id)->select('Name','email','Mobile_Number')->get();
+	$update_read_info = \DB::table('sp_pending_services')->where('Sp_Id',\Session::get('id'))->where('User_Id',$user_id)->where('Service_Id',$service_id)->update(array('Read' =>'1'));
+
+		/*$delete_client_serice_request = \DB::table('sp_pending_services')->where('User_Id',\Input::get('User_Id'))
+		->where('Service_Id',\Input::get('Service_Id'))->update(array('Deleted' => '1'));*/
+		
+		return view('client_name')->with('get_user_info',$get_user_info);
+	
+	}
+	
 	public function sp_details()
 	{
-		return view('sp_details');
 	
+		$Hired_Services = \DB::table('sp_hired_services')
+		->join('sp_service_info','sp_service_info.SP_Users_Id','=','sp_hired_services.SP_Id')
+		->join('sp_service_categories','sp_service_categories.id','=','sp_hired_services.Service_Id')
+		->select()->get();
+		
+		
+		return view('sp_details')->with('Hired_Services',$Hired_Services);
+
+	}
+	
+	
+	public function user_details()
+	{
+	
+		$Hired_Services = \DB::table('sp_hired_services')
+		->join('sp_service_info','sp_service_info.SP_Users_Id','=','sp_hired_services.SP_Id')
+		->join('sp_service_categories','sp_service_categories.id','=','sp_hired_services.Service_Id')
+		->select()->get();
+		
+		
+		return view('user_details')->with('Hired_Services',$Hired_Services);
+
+	}
+	
+	
+	
+	public function waiting_sp_approval()
+	{
+		$notification_count = \DB::table('sp_pending_services')->where('Sp_Id', '=', \Session::get('id'))->where('Read', '=', '0')->where('Deleted', '=', '0')->count();
+		
+		\Session::put('notification_count',$notification_count);
+		
+		$client_info = \DB::table('sp_pending_services')->join('sp_users_info','sp_users_info.id','=','sp_pending_services.User_Id')
+		->join('sp_service_categories','sp_service_categories.id','=','sp_pending_services.Service_Id')
+		->where('sp_pending_services.Sp_Id', '=', \Session::get('id'))->where('sp_pending_services.Deleted', '=', '0')->select()->get();
+
+		return view('waiting_sp_approval')->with('client_info',$client_info);
 	}
 
 }
